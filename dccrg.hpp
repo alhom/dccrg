@@ -6357,7 +6357,6 @@ public:
 				abort();
 			}
 			#endif
-
 			return false;
 		}
 
@@ -8605,6 +8604,27 @@ private:
 		}
 	}
 
+public:
+        void update_remote_cell_information(const std::vector<uint64_t> cells)
+	{
+	   for (uint i=0; i<cells.size(); i++) {
+	     this->update_neighbors(cells[i]);
+	   }
+	   // also remote neighbor info of user neighborhoods
+	   for (std::unordered_map<int, std::vector<Types<3>::neighborhood_item_t>>::const_iterator
+		 item = this->user_hood_of.begin();
+	         item != this->user_hood_of.end();
+	         item++
+	       ) {
+	      for (uint i=0; i<cells.size(); i++) {
+		 this->update_user_neighbors(cells[i],item->first);
+	      }
+	   }
+           // update_remote_neighbor_info() and update_user_remote_neighbor_info() are
+           // about which cells are actually remote or local so not touched here
+	}
+
+private:
 
 	/*!
 	Updates neighbor and neighbor_to lists around given cell's neighborhood.
