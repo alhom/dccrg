@@ -77,7 +77,7 @@ MPI_UNSIGNED_LONG in the following:
 #include "dccrg_topology.hpp"
 #include "dccrg_types.hpp"
 
-
+#define DEBUG2
 /*!
 Namespace where all dccrg classes, functions, etc are defined.
 */
@@ -770,7 +770,7 @@ public:
 	) const {
 		if (this->cell_data.count(cell) > 0) {
 			if (neighborhood_id == default_neighborhood_id) {
-				#ifdef DEBUG
+				#ifdef DEBUG2
 				if (this->neighbors_of.count(cell) == 0) {
 					std::cerr << __FILE__ << ":" << __LINE__
 						<< " Process " << this->rank
@@ -785,7 +785,7 @@ public:
 
 			} else if (this->user_hood_of.count(neighborhood_id) > 0) {
 
-				#ifdef DEBUG
+				#ifdef DEBUG2
 				if (this->user_neigh_of.at(neighborhood_id).count(cell) == 0) {
 					std::cerr << __FILE__ << ":" << __LINE__
 						<< " Process " << this->rank
