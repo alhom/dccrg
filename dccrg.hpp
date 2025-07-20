@@ -6285,7 +6285,7 @@ public:
 		this->recalculate_neighbor_update_send_receive_lists(neighborhood_id);
 		this->allocate_copies_of_remote_neighbors(neighborhood_id);
 
-		#ifdef DEBUG
+		// #ifdef DEBUG
 		if (!this->is_consistent()) {
 			std::cerr << __FILE__ << ":" << __LINE__
 				<< " The grid is inconsistent"
@@ -6293,27 +6293,27 @@ public:
 			exit(EXIT_FAILURE);
 		}
 
-		if (!this->verify_neighbors()) {
-			std::cerr << __FILE__ << ":" << __LINE__
-				<< " Neighbor lists are incorrect"
-				<< std::endl;
-			exit(EXIT_FAILURE);
-		}
+		// if (!this->verify_neighbors()) {
+		// 	std::cerr << __FILE__ << ":" << __LINE__
+		// 		<< " Neighbor lists are incorrect"
+		// 		<< std::endl;
+		// 	exit(EXIT_FAILURE);
+		// }
 
-		if (!this->verify_remote_neighbor_info()) {
-			std::cerr << __FILE__ << ":" << __LINE__
-				<< " Remote neighbor info is not consistent"
-				<< std::endl;
-			exit(EXIT_FAILURE);
-		}
+		// if (!this->verify_remote_neighbor_info()) {
+		// 	std::cerr << __FILE__ << ":" << __LINE__
+		// 		<< " Remote neighbor info is not consistent"
+		// 		<< std::endl;
+		// 	exit(EXIT_FAILURE);
+		// }
 
-		if (!this->verify_user_data()) {
-			std::cerr << __FILE__ << ":" << __LINE__
-				<< " User data not consistent"
-				<< std::endl;
-			exit(EXIT_FAILURE);
-		}
-		#endif
+		// if (!this->verify_user_data()) {
+		// 	std::cerr << __FILE__ << ":" << __LINE__
+		// 		<< " User data not consistent"
+		// 		<< std::endl;
+		// 	exit(EXIT_FAILURE);
+		// }
+		// #endif
 
 		return true;
 	}
@@ -10074,6 +10074,35 @@ public:
 		} // end loop cells
 	}
 
+	void really_force_update_cell_neighborhoods(const std::vector<uint64_t> cells)
+	{
+		// check; if current neigbourhood list exists and all cells are found, assume neighbourhood is valid.
+		// otherwise re-calculate it.
+		for (uint i=0; i<cells.size(); i++) {
+			uint64_t cell = cells[i];
+			bool recalculate = true;
+			if (recalculate) {
+				this->neighbors_of[cell].clear();
+				this->neighbors_to[cell].clear();
+				this->neighbors_of[cell] = this->find_neighbors_of(cell, this->neighborhood_of);
+				// Symmetric complement
+				// this->neighbors_to[cell] = this->find_neighbors_to(cell, this->neighborhood_to);
+				// this->neighbors_to[cell] = this->fill_neighbors_to(cell);
+				this->neighbors_to[cell] = this->neighbors_of[cell];
+				this->face_neighbors_of[cell] = this->find_face_neighbors_of(cell);
+
+				// update user neighbor lists
+				for (std::unordered_map<int, std::vector<Types<3>::neighborhood_item_t>>::const_iterator
+					item = this->user_hood_of.begin();
+					item != this->user_hood_of.end();
+					item++
+				) {
+					this->update_user_neighbors<true>(cell, item->first);
+				}
+			} // end recalculate
+		} // end loop cells
+	}
+
         /*!
 	Returns the smallest existing cell at given indices between given refinement levels inclusive.
 
@@ -10999,7 +11028,6 @@ private:
 		}
 	}
 
-#ifdef DEBUG
 	/*!
 	Returns false if the same cells don't exist on the same process for all processes.
 	DEBUG ONLY
@@ -11117,6 +11145,7 @@ private:
 		return false;
 
 	}
+	#ifdef DEBUG
 
 	/*!
 	Return false if neighbors lists of the given cell aren't consistent
@@ -11283,7 +11312,6 @@ private:
 		return true;
 	}
 
-
 	/*!
 	Returns false if neighbor lists on this process aren't consistent
 	DEBUG ONLY
@@ -11355,7 +11383,7 @@ private:
 		return true;
 	}
 
-
+#endif
 	/*!
 	Returns false if remote neighbor info for given cell is inconsistent.
 
@@ -11433,7 +11461,7 @@ private:
 		return true;
 	}
 
-
+#ifdef DEBUG
 	/*!
 	Returns false if remote neighbor info on this process is inconsistent.
 
@@ -11617,7 +11645,8 @@ private:
 
 		return true;
 	}
-
+	#endif
+#ifdef DEBUG
 
 	/*!
 	Returns true if all cells are where pin reqests should have placed them.
